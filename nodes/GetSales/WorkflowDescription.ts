@@ -32,15 +32,37 @@ export const workflowFields: INodeProperties[] = [
 		default: '',
 	},
 	{
-		displayName: 'Workflow Name or ID',
+		displayName: 'Workflow',
 		name: 'workflowSid',
-		type: 'options',
-		typeOptions: { loadOptionsMethod: 'getWorkflows' },
+		type: 'resourceLocator',
 		required: true,
 		displayOptions: { show: addPeople },
-		default: '',
-		description:
-			'An active, published GetSales workflow. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+		default: { mode: 'list', value: '' },
+		description: 'An active, published GetSales workflow',
+		modes: [
+			{
+				displayName: 'From List',
+				name: 'list',
+				type: 'list',
+				placeholder: 'Select a workflow...',
+				typeOptions: { searchListMethod: 'searchWorkflows', searchable: true },
+			},
+			{
+				displayName: 'By ID',
+				name: 'id',
+				type: 'string',
+				placeholder: 'e.g. wf_wf_Q7mN2pL4xR8t',
+				validation: [
+					{
+						type: 'regex',
+						properties: {
+							regex: '^wf_wf_[A-Za-z0-9]{12}$',
+							errorMessage: 'A GetSales workflow ID starts with wf_wf_ and has 18 characters',
+						},
+					},
+				],
+			},
+		],
 	},
 	{
 		displayName: 'Person SID',

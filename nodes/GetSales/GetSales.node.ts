@@ -9,7 +9,7 @@ import type {
 import { NodeApiError, NodeConnectionTypes, NodeOperationError } from 'n8n-workflow';
 
 import type { ApiCall } from './GenericFunctions';
-import { bindApiCall, loadTables, loadWorkflows, searchRows } from './GenericFunctions';
+import { bindApiCall, searchRows, searchTables, searchWorkflows } from './GenericFunctions';
 import { messageFields, messageOperations } from './MessageDescription';
 import { personFields, personOperations } from './PersonDescription';
 import { workflowFields, workflowOperations } from './WorkflowDescription';
@@ -44,7 +44,7 @@ async function addPersonToTable(
 	call: ApiCall,
 	itemIndex: number,
 ): Promise<IDataObject> {
-	const playtableSid = text(ctx.getNodeParameter('playtableSid', itemIndex));
+	const playtableSid = text(ctx.getNodeParameter('playtableSid', itemIndex, '', { extractValue: true }));
 	if (!isSid(playtableSid, 'pt_tb_')) {
 		throw new NodeOperationError(ctx.getNode(), 'Pick a table: a table ID starts with pt_tb_', {
 			itemIndex,
@@ -111,7 +111,7 @@ async function findPeople(
 		filter.q = query;
 	}
 
-	const playtableSid = text(ctx.getNodeParameter('playtableSid', itemIndex, ''));
+	const playtableSid = text(ctx.getNodeParameter('playtableSid', itemIndex, '', { extractValue: true }));
 	if (playtableSid !== '') filter.playtable_sid = { eq: playtableSid };
 
 	const options = ctx.getNodeParameter('options', itemIndex, {}) as IDataObject;
@@ -202,9 +202,9 @@ export class GetSales implements INodeType {
 	};
 
 	methods = {
-		loadOptions: {
-			getTables: loadTables,
-			getWorkflows: loadWorkflows,
+		listSearch: {
+			searchTables,
+			searchWorkflows,
 		},
 	};
 
@@ -220,7 +220,7 @@ export class GetSales implements INodeType {
 			const groups = new Map<string, { sids: string[]; itemIndexes: number[] }>();
 			for (let i = 0; i < items.length; i++) {
 				try {
-					const workflowSid = text(this.getNodeParameter('workflowSid', i));
+					const workflowSid = text(this.getNodeParameter('workflowSid', i, '', { extractValue: true }));
 					if (!isSid(workflowSid, 'wf_wf_')) {
 						throw new NodeOperationError(this.getNode(), 'Pick a workflow: its ID starts with wf_wf_', {
 							itemIndex: i,

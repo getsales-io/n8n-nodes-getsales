@@ -147,7 +147,7 @@ test('Message: Get says so when the message is not in the workspace', async () =
 	await assert.rejects(promise, /No message ub_ms_Jk2mP9nR4qW1 in this workspace/);
 });
 
-test('the dropdowns list unarchived tables and active, published workflows', async () => {
+test('the pickers list unarchived tables and active, published workflows', async () => {
 	const node = new GetSales();
 	const bodies = [];
 	const ctx = executeContext({
@@ -158,10 +158,38 @@ test('the dropdowns list unarchived tables and active, published workflows', asy
 			return searchPage([{ sid: call.path.includes('workflows') ? 'wf_wf_Q7mN2pL4xR8t' : TABLE, name: 'Berlin agencies' }]);
 		},
 	});
-	const tables = await node.methods.loadOptions.getTables.call(ctx);
-	const workflows = await node.methods.loadOptions.getWorkflows.call(ctx);
-	assert.deepEqual(tables, [{ name: 'Berlin agencies', value: TABLE, description: TABLE }]);
-	assert.equal(workflows[0].value, 'wf_wf_Q7mN2pL4xR8t');
+	const tables = await node.methods.listSearch.searchTables.call(ctx);
+	const workflows = await node.methods.listSearch.searchWorkflows.call(ctx);
+	assert.deepEqual(tables, { results: [{ name: 'Berlin agencies', value: TABLE }] });
+	assert.equal(workflows.results[0].value, 'wf_wf_Q7mN2pL4xR8t');
 	assert.deepEqual(bodies[0], { path: '/api/playtables/search', body: { sort: { field: 'name', direction: 'asc' }, page_size: 500 } });
 	assert.deepEqual(bodies[1].body.filter, { status: { eq: 'active' }, published_version_sid: { is_null: false } });
+});
+
+test('a picker keeps the entries whose name holds the typed text, or whose ID it is', async () => {
+	const node = new GetSales();
+	const ctx = executeContext({
+		items: [],
+		params: () => undefined,
+		handler: async () =>
+			searchPage([
+				{ sid: TABLE, name: 'Berlin agencies' },
+				{ sid: 'pt_tb_Z9yX8wV7uT6s', name: 'Lisbon founders' },
+			]),
+	});
+	assert.deepEqual((await node.methods.listSearch.searchTables.call(ctx, 'berlin')).results.map((r) => r.value), [TABLE]);
+	assert.deepEqual((await node.methods.listSearch.searchTables.call(ctx, 'PT_TB_Z9YX8WV7UT6S')).results.map((r) => r.name), ['Lisbon founders']);
+	assert.equal((await node.methods.listSearch.searchTables.call(ctx, '  ')).results.length, 2);
+});
+
+test('the table and workflow pickers are resource locators that read their list when opened', () => {
+	const { properties } = new GetSales().description;
+	for (const name of ['playtableSid', 'workflowSid']) {
+		for (const property of properties.filter((p) => p.name === name)) {
+			assert.equal(property.type, 'resourceLocator', name);
+			assert.deepEqual(property.default, { mode: 'list', value: '' }, name);
+			const list = property.modes.find((mode) => mode.name === 'list');
+			assert.ok(list.typeOptions.searchListMethod in new GetSales().methods.listSearch, name);
+		}
+	}
 });

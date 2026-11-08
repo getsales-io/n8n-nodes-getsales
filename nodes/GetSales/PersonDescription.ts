@@ -32,15 +32,34 @@ const find = { resource: ['person'], operation: ['find'] };
 export const personFields: INodeProperties[] = [
 	// ----- Person: Add to Table -----
 	{
-		displayName: 'Table Name or ID',
+		displayName: 'Table',
 		name: 'playtableSid',
-		type: 'options',
-		typeOptions: { loadOptionsMethod: 'getTables' },
+		type: 'resourceLocator',
 		required: true,
 		displayOptions: { show: addToTable },
-		default: '',
-		description:
-			'The table the person joins. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+		default: { mode: 'list', value: '' },
+		description: 'The table the person joins',
+		modes: [
+			{
+				displayName: 'From List',
+				name: 'list',
+				type: 'list',
+				placeholder: 'Select a table...',
+				typeOptions: { searchListMethod: 'searchTables', searchable: true },
+			},
+			{
+				displayName: 'By ID',
+				name: 'id',
+				type: 'string',
+				placeholder: 'e.g. pt_tb_K8vR2nX5qL1m',
+				validation: [
+					{
+						type: 'regex',
+						properties: { regex: '^pt_tb_[A-Za-z0-9]{12}$', errorMessage: 'A table ID starts with pt_tb_ and has 18 characters' },
+					},
+				],
+			},
+		],
 	},
 	{
 		displayName: 'Full Name',
@@ -191,14 +210,33 @@ export const personFields: INodeProperties[] = [
 		description: 'Up to 128 characters',
 	},
 	{
-		displayName: 'Table Name or ID',
+		displayName: 'Table',
 		name: 'playtableSid',
-		type: 'options',
-		typeOptions: { loadOptionsMethod: 'getTables' },
+		type: 'resourceLocator',
 		displayOptions: { show: find },
-		default: '',
-		description:
-			'Look only in this table, or leave empty for every table. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+		default: { mode: 'list', value: '' },
+		description: 'Look only in this table, or leave it empty for every table',
+		modes: [
+			{
+				displayName: 'From List',
+				name: 'list',
+				type: 'list',
+				placeholder: 'Select a table...',
+				typeOptions: { searchListMethod: 'searchTables', searchable: true },
+			},
+			{
+				displayName: 'By ID',
+				name: 'id',
+				type: 'string',
+				placeholder: 'e.g. pt_tb_K8vR2nX5qL1m',
+				validation: [
+					{
+						type: 'regex',
+						properties: { regex: '^pt_tb_[A-Za-z0-9]{12}$', errorMessage: 'A table ID starts with pt_tb_ and has 18 characters' },
+					},
+				],
+			},
+		],
 	},
 	{
 		displayName: 'Max Results',

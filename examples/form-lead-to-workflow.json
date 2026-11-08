@@ -38,7 +38,11 @@
       "parameters": {
         "resource": "person",
         "operation": "addToTable",
-        "playtableSid": "",
+        "playtableSid": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
         "fullName": "={{ $json.full_name }}",
         "workEmail": "={{ $json.work_email }}",
         "additionalFields": {
@@ -57,7 +61,11 @@
       "parameters": {
         "resource": "workflow",
         "operation": "addPeople",
-        "workflowSid": "",
+        "workflowSid": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
         "personSid": "={{ $json.sid }}"
       },
       "name": "Add to a GetSales workflow",

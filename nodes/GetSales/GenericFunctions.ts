@@ -5,7 +5,8 @@ import type {
 	IHttpRequestMethods,
 	IHttpRequestOptions,
 	ILoadOptionsFunctions,
-	INodePropertyOptions,
+	INodeListSearchItems,
+	INodeListSearchResult,
 	JsonObject,
 } from 'n8n-workflow';
 import { NodeApiError } from 'n8n-workflow';
@@ -208,8 +209,19 @@ export async function searchRows(
 	return rows.slice(0, wanted);
 }
 
-/** The tables of the workspace, archived ones left out, for a dropdown. */
-export async function loadTables(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
+/** The rows whose name holds the typed text, or whose sid is the typed text, as list entries. */
+function listResults(rows: SearchRow[], filter?: string): INodeListSearchItems[] {
+	const needle = (filter ?? '').trim().toLowerCase();
+	return rows
+		.map(({ item }) => ({ name: String(item.name ?? item.sid), value: String(item.sid) }))
+		.filter((entry) => needle === '' || entry.name.toLowerCase().includes(needle) || entry.value.toLowerCase() === needle);
+}
+
+/**
+ * The tables of the workspace, archived ones left out, for the table picker. A picker reads its
+ * list when it is opened, by then with the node's credential in place.
+ */
+export async function searchTables(this: ILoadOptionsFunctions, filter?: string): Promise<INodeListSearchResult> {
 	const rows = await searchRows(
 		bindApiCall(this),
 		'playtables',
@@ -217,15 +229,11 @@ export async function loadTables(this: ILoadOptionsFunctions): Promise<INodeProp
 		{ sort: { field: 'name', direction: 'asc' } },
 		2000,
 	);
-	return rows.map(({ item }) => ({
-		name: String(item.name ?? item.sid),
-		value: String(item.sid),
-		description: String(item.sid),
-	}));
+	return { results: listResults(rows, filter) };
 }
 
-/** The GetSales workflows that can take people now: active and published. */
-export async function loadWorkflows(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
+/** The GetSales workflows that can take people now, active and published, for the workflow picker. */
+export async function searchWorkflows(this: ILoadOptionsFunctions, filter?: string): Promise<INodeListSearchResult> {
 	const rows = await searchRows(
 		bindApiCall(this),
 		'playtables',
@@ -236,9 +244,5 @@ export async function loadWorkflows(this: ILoadOptionsFunctions): Promise<INodeP
 		},
 		2000,
 	);
-	return rows.map(({ item }) => ({
-		name: String(item.name ?? item.sid),
-		value: String(item.sid),
-		description: String(item.sid),
-	}));
+	return { results: listResults(rows, filter) };
 }
