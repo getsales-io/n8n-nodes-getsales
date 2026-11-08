@@ -10,11 +10,12 @@
 #            reads. Its environment, npm, is where a required reviewer can be added.
 #
 # npm credential: until the package exists on npmjs.com, npm can only take a token, kept as
-# the secret NPM_TOKEN (a granular token limited to the @getsales scope, best stored as a
-# secret of the npm environment). Once the first version is out, register this repository
-# and this file as the package's trusted publisher on npmjs.com, then drop the secret and
-# the env lines of the publish step. Trusted publishing needs npm 11.5.1 or newer, so the
-# publish job runs Node 24 and prints its npm version first.
+# the secret NPM_TOKEN of the npm environment. npm takes no direct first publish from a token
+# on an account with 2FA, so the first version is staged: npm stage publish sends it, with
+# its provenance, to the account's Staged Packages, where a maintainer approves it with 2FA.
+# Once the package exists, register this repository and this file as its trusted publisher
+# on npmjs.com and drop the secret: later tags then publish directly. Staged publishing needs
+# npm 11.15.0 or newer, so the publish job runs Node 24 and prints its npm version first.
 name: Release to npm
 
 on:
@@ -61,6 +62,12 @@ jobs:
           node-version: 24
           registry-url: 'https://registry.npmjs.org'
       - run: npm --version
-      - run: npm publish ./getsales-n8n-nodes-getsales-*.tgz --provenance --access public --ignore-scripts
+      - name: Publish, or stage the first version
+        run: |
+          if npm view @getsales/n8n-nodes-getsales version >/dev/null 2>&1; then
+            npm publish ./getsales-n8n-nodes-getsales-*.tgz --provenance --access public --ignore-scripts
+          else
+            npm stage publish ./getsales-n8n-nodes-getsales-*.tgz --provenance --access public --ignore-scripts
+          fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
