@@ -1,0 +1,113 @@
+{
+  "name": "GetSales: add form leads to a table and a GetSales workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Talk to our team",
+        "formDescription": "Leave your work email and we will be in touch.",
+        "formFields": {
+          "values": [
+            {
+              "fieldName": "full_name",
+              "fieldLabel": "Full name",
+              "requiredField": true
+            },
+            {
+              "fieldName": "work_email",
+              "fieldLabel": "Work email",
+              "fieldType": "email",
+              "requiredField": true
+            },
+            {
+              "fieldName": "company",
+              "fieldLabel": "Company"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Form submitted",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "person",
+        "operation": "addToTable",
+        "playtableSid": "",
+        "fullName": "={{ $json.full_name }}",
+        "workEmail": "={{ $json.work_email }}",
+        "additionalFields": {
+          "companyName": "={{ $json.company }}"
+        }
+      },
+      "name": "Add to a table",
+      "type": "@getsales/n8n-nodes-getsales.getSales",
+      "typeVersion": 1,
+      "position": [
+        240,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "workflow",
+        "operation": "addPeople",
+        "workflowSid": "",
+        "personSid": "={{ $json.sid }}"
+      },
+      "name": "Add to a GetSales workflow",
+      "type": "@getsales/n8n-nodes-getsales.getSales",
+      "typeVersion": 1,
+      "position": [
+        480,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Form leads into GetSales\n\n1. Create a **GetSales API** credential with a key from GetSales, Settings, API keys (the Automation platform preset).\n2. Pick the table in **Add to a table** and a published GetSales workflow in **Add to a GetSales workflow**.\n3. Share the form's production URL.\n\nA person GetSales already has comes back as it is, and the workflow leaves anyone it holds already alone, so a repeated submission starts nothing twice. Your stoplist still applies.",
+        "height": 320,
+        "width": 440
+      },
+      "name": "Setup",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -40,
+        -360
+      ]
+    }
+  ],
+  "connections": {
+    "Form submitted": {
+      "main": [
+        [
+          {
+            "node": "Add to a table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add to a table": {
+      "main": [
+        [
+          {
+            "node": "Add to a GetSales workflow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

@@ -1,0 +1,66 @@
+# Ships @getsales/n8n-nodes-getsales to npm when a tag such as v1.0.0 is pushed.
+#
+# The work is split so that the dev tree never runs where a publishing token can be minted:
+#   check    reads the repository only. It confirms the tag names the version in
+#            package.json, installs the dev tooling with install scripts off, runs the lint
+#            and the tests, packs the tarball and keeps it as a workflow artifact.
+#   publish  receives that tarball and runs nothing from the project: no checkout, no
+#            npm ci, no package script. It is the one job allowed to request a GitHub OIDC
+#            token, which npm uses to attach the provenance statement n8n's verification
+#            reads. Its environment, npm, is where a required reviewer can be added.
+#
+# npm credential: until the package exists on npmjs.com, npm can only take a token, kept as
+# the secret NPM_TOKEN (a granular token limited to the @getsales scope, best stored as a
+# secret of the npm environment). Once the first version is out, register this repository
+# and this file as the package's trusted publisher on npmjs.com, then drop the secret and
+# the env lines of the publish step. Trusted publishing needs npm 11.5.1 or newer, so the
+# publish job runs Node 24 and prints its npm version first.
+name: Release to npm
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Tag matches package.json
+        run: test "v$(node -p "require('./package.json').version")" = "$GITHUB_REF_NAME"
+      - run: npm ci --ignore-scripts
+      - run: npm run lint
+      - run: npm test
+      - run: npm pack
+      - uses: actions/upload-artifact@v4
+        with:
+          name: npm-tarball
+          path: getsales-n8n-nodes-getsales-*.tgz
+          if-no-files-found: error
+          retention-days: 7
+
+  publish:
+    needs: check
+    runs-on: ubuntu-latest
+    environment: npm
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: npm-tarball
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: 'https://registry.npmjs.org'
+      - run: npm --version
+      - run: npm publish ./getsales-n8n-nodes-getsales-*.tgz --provenance --access public --ignore-scripts
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

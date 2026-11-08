@@ -1,0 +1,19 @@
+{
+	"node": "@getsales/n8n-nodes-getsales.getSales",
+	"nodeVersion": "1.0",
+	"codexVersion": "1.0",
+	"categories": ["Sales", "Marketing & Content", "Communication"],
+	"alias": ["Cold Email", "Outreach", "Sales Engagement", "AI SDR", "Enrichment", "Lead Generation", "Unified Inbox"],
+	"resources": {
+		"primaryDocumentation": [
+			{
+				"url": "https://getsales.io/integrations/n8n/"
+			}
+		],
+		"credentialDocumentation": [
+			{
+				"url": "https://docs.getsales.io/authentication"
+			}
+		]
+	}
+}

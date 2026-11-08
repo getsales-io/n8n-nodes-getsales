@@ -1,0 +1,62 @@
+{
+  "name": "@getsales/n8n-nodes-getsales",
+  "version": "1.0.0",
+  "description": "GetSales: n8n nodes. A reply, a task or a website visit in GetSales starts an n8n workflow, and the GetSales node adds people to your tables and GetSales workflows.",
+  "keywords": [
+    "n8n-community-node-package",
+    "n8n",
+    "getsales",
+    "cold-email",
+    "outreach",
+    "sales-engagement",
+    "ai-sdr",
+    "enrichment",
+    "lead-generation",
+    "unified-inbox"
+  ],
+  "license": "MIT",
+  "homepage": "https://docs.getsales.io",
+  "author": {
+    "name": "GetSales",
+    "email": "support@getsales.io"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/getsales-io/n8n-nodes-getsales.git"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc && node scripts/copy-assets.js",
+    "dev": "tsc --watch",
+    "lint": "tsc --noEmit && eslint package.json credentials nodes shared",
+    "test": "npm run build && node --test test/*.test.js",
+    "scan": "sh scripts/scan-local.sh"
+  },
+  "files": [
+    "dist"
+  ],
+  "n8n": {
+    "n8nNodesApiVersion": 1,
+    "credentials": [
+      "dist/credentials/GetSalesApi.credentials.js"
+    ],
+    "nodes": [
+      "dist/nodes/GetSales/GetSales.node.js",
+      "dist/nodes/GetSalesTrigger/GetSalesTrigger.node.js"
+    ]
+  },
+  "peerDependencies": {
+    "n8n-workflow": "*"
+  },
+  "devDependencies": {
+    "@n8n/eslint-plugin-community-nodes": "0.39.0",
+    "@types/node": "22.20.5",
+    "@typescript-eslint/parser": "8.70.0",
+    "eslint": "9.29.0",
+    "eslint-plugin-n8n-nodes-base": "2.0.0",
+    "n8n-workflow": "2.45.4",
+    "typescript": "5.9.3"
+  }
+}

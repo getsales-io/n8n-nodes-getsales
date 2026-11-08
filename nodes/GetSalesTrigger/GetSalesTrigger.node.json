@@ -1,0 +1,19 @@
+{
+	"node": "@getsales/n8n-nodes-getsales.getSalesTrigger",
+	"nodeVersion": "1.0",
+	"codexVersion": "1.0",
+	"categories": ["Sales", "Marketing & Content", "Communication"],
+	"alias": ["Cold Email", "Outreach", "Sales Engagement", "AI SDR", "Reply", "Website Visitor", "Buying Signals"],
+	"resources": {
+		"primaryDocumentation": [
+			{
+				"url": "https://getsales.io/integrations/n8n/"
+			}
+		],
+		"credentialDocumentation": [
+			{
+				"url": "https://docs.getsales.io/authentication"
+			}
+		]
+	}
+}
